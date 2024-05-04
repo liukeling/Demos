@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>admin</title>
+</head>
+<body>
+<button onclick="showInfo()" >getMsg</button>
+<p id="msgs">
+
+</p>
+</body>
+<script src="jquery-3.3.1.min.js"></script>
+<script>
+    function showInfo() {
+        $.get("xss/getMsgList",function(rep){
+            console.log("================");
+            console.log(rep);
+            let txt = "";
+            for(let i=0;i < rep.length; i++){
+                txt = txt+"<br />" + rep[i].sessionId +" : "+rep[i].msg;
+            }
+            //会被script脚本注入攻击
+            $("#msgs").html(txt);
+            //使用text方法 - 不会当作脚本执行 但是不能换行 - 要换行另外加div或者其他标签
+            // $("#msgs").text(txt);
+
+        },"json")
+    }
+</script>
+</html>
