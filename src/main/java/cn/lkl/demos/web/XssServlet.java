@@ -12,6 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 模拟script脚本攻击
+ * 1.用户提交内容保存到数据库（有script脚本  xssUser.html） - 我这里用map缓存模拟
+ * 2.内容显示在admin页面(xssAdmin.html) 使用 jquery的html方法显示内容 会执行script脚本
+ * 3.预防 1.前端输入校验内容 2.后端内容存储转义下字符 3.显示的地方使用text显示，不要用html
+ */
 public class XssServlet extends HttpServlet {
     volatile Map<String, String> messages = new HashMap<>(3);
     @Override

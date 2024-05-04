@@ -6,6 +6,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ 模拟跨域攻击：<br />
+ 1.开两个tomcat服务, 一个是localhost:8080（被攻击网站）  一个是127.0.0.1:8081 （攻击网站）<br />
+ 2.都部署 demo这个应用 为了方便，不写两个了 <br />
+ 3.可以通过浏览器控制台查看cookie,确保localhost:8080 生成了cookie, 127.0.0.1:8081他不需要kookie<br />
+ 4.访问攻击地址：http://127.0.0.1:8081/demo/test/attack  <br />
+ 5.自动提交了表单到 http://localhost:8080/demo/test/byAttack ,tomcat控制台可以看到cookie(用户在该网站的)和referer（攻击网站的） <br />
+ 6.预防：后端设置响应头 Access-Control-Allow-Origin 只允许的来源；接口头比较referer；不把登录信息绑定cookie,使用token <br />
+ */
 public class TestServlet implements Servlet {
     private ServletContext context;
     private ServletConfig config;
