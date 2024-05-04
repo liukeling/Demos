@@ -14,19 +14,18 @@ import java.util.concurrent.locks.ReentrantLock;
  * 中断：Interrupt ,别的线程可以调用中断方法，给线程一个信号，线程通过isInterrupted 判断是否被中断了。
  * sleep等方法会抛出中断异常，锁等待不会
  * 停止：stop 如果线程拿到锁了，被停止了，不会释放资源 - 可以拿到block
- *
  */
 public class ThreadTest {
     /**
      * 中断、停止测试 - 中断可以继续跑  停止就不会跑了
      */
-    public static void testInterruptAndStop(){
+    public static void testInterruptAndStop() {
 
         ReentrantLock reentrantLock = new ReentrantLock();
         reentrantLock.lock();
-        Thread t = new Thread(()->{
+        Thread t = new Thread(() -> {
             reentrantLock.lock();
-            System.out.println("================in...."+Thread.currentThread().isInterrupted());
+            System.out.println("================in...." + Thread.currentThread().isInterrupted());
             reentrantLock.unlock();
         });
         t.start();
@@ -43,10 +42,10 @@ public class ThreadTest {
     /**
      * 拿到锁了，被停止了，会释放锁吗  不会
      */
-    public static void testStopLock(){
+    public static void testStopLock() {
         ReentrantLock lock = new ReentrantLock();
 //        Object lock = new Object();
-        Thread t = new Thread(()-> {
+        Thread t = new Thread(() -> {
             lock.lock();
 //            synchronized (lock){
             System.out.println("==========in sleep");
@@ -78,15 +77,14 @@ public class ThreadTest {
      * sleep 和 synchronized锁等待 没有blocker
      * 只有 基于lockSupper 的才有blocker
      */
-    public static void testBlocker(){
+    public static void testBlocker() {
         ReentrantLock lock1 = new ReentrantLock();
 //        ReentrantLock lock2 = new ReentrantLock();
 //        lock2.lock();
         Object lock2 = new Object();
-        synchronized (lock2) {
-            Thread t = new Thread(() -> {
-                lock1.lock();
-                System.out.println("========to wait or sleep==");
+        Thread t = new Thread(() -> {
+            lock1.lock();
+            System.out.println("========to wait or sleep==");
 //            try {
 //                TimeUnit.SECONDS.sleep(5);
 //            } catch (InterruptedException e) {
@@ -94,21 +92,25 @@ public class ThreadTest {
 //            }
 //            lock2.lock();
 //            lock2.unlock();
-                synchronized (lock2) {
-
+            synchronized (lock2) {
+                try {
+                    System.out.println("=========wait");
+                    lock2.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-                System.out.println("=========to unlock");
-                lock1.unlock();
-            });
-            t.start();
-            try {
-                TimeUnit.SECONDS.sleep(2);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
+            System.out.println("=========to unlock");
+            lock1.unlock();
+        });
+        t.start();
 
-            System.out.println(LockSupport.getBlocker(t));
+        System.out.println(t.getState()+"   "+LockSupport.getBlocker(t));
+        synchronized (lock2) {
+            System.out.println(t.getState()+"   "+LockSupport.getBlocker(t));
+            lock2.notify();
         }
+        System.out.println(t.getState()+"   "+LockSupport.getBlocker(t));
 //        lock2.unlock();
 
     }
@@ -116,10 +118,10 @@ public class ThreadTest {
     /**
      * 线程停止了会有blocker吗 会
      */
-    public static void testStopBlocker(){
+    public static void testStopBlocker() {
         ReentrantLock lock = new ReentrantLock();
         lock.lock();
-        Thread t = new Thread(()->{
+        Thread t = new Thread(() -> {
             lock.lock();
 
             try {
@@ -140,6 +142,7 @@ public class ThreadTest {
         System.out.println(LockSupport.getBlocker(t));
         lock.unlock();
     }
+
     /**
      * 线程池 先核心线程跑满,然后塞队列,队列满了开临时线程 到了最大线程数了启动拒绝策略
      * execute : 执行任务 每返回
@@ -151,19 +154,19 @@ public class ThreadTest {
      * threadFactory 线程工厂
      * RejectedExecutionHandler 拒绝策略 有四个可以选,默认是抛出异常,还有:让调用者执行、丢弃任务、丢弃一个队尾任务、丢弃一个队列前任务
      */
-    public static void testPool(){
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(3,10,5, TimeUnit.SECONDS,new ArrayBlockingQueue<>(20));
+    public static void testPool() {
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(3, 10, 5, TimeUnit.SECONDS, new ArrayBlockingQueue<>(20));
         //23 不会开启临时线程  超过23会开启   超过33 会启动拒绝策略
-        for (int i = 0; i < 26; i ++){
+        for (int i = 0; i < 26; i++) {
             final int ri = i;
-            executor.execute(()->{
-                System.out.println(ri+"  begin ===="+executor.getPoolSize());
+            executor.execute(() -> {
+                System.out.println(ri + "  begin ====" + executor.getPoolSize());
                 try {
                     TimeUnit.SECONDS.sleep(2);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                System.out.println(ri+"  end ===="+executor.getPoolSize());
+                System.out.println(ri + "  end ====" + executor.getPoolSize());
             });
         }
     }

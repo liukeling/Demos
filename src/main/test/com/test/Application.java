@@ -23,7 +23,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Application {
 
     public static void main(String[] args) throws Exception {
-        new Application().testDeadLock();
+        new Application().threadTest();
     }
 
     /**
@@ -63,7 +63,7 @@ public class Application {
     @Test
     public void threadTest() throws NamingException {
 //        ThreadTest.testStopLock();
-//        ThreadTest.testBlocker();
+        ThreadTest.testBlocker();
 //        ThreadTest.testStopBlocker();
 //        ThreadTest.testPool();
 //        Hashtable<String, String> deadLockEnv = new Hashtable<>();
@@ -71,16 +71,16 @@ public class Application {
 //        deadLockEnv.put(Context.PROVIDER_URL,"check:asse/env");
 //        Context c = new InitialContext();
 //        c.bind("dead");
-        try {
-            InitialContext ct = new InitialContext();
-            NamingEnumeration<NameClassPair> list = ct.list("check:asse");
-            while (list.hasMoreElements()) {
-                NameClassPair next = list.next();
-                System.out.println(next.getName() + "============" + next.getClassName());
-            }
-        } catch (NamingException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            InitialContext ct = new InitialContext();
+//            NamingEnumeration<NameClassPair> list = ct.list("check:asse");
+//            while (list.hasMoreElements()) {
+//                NameClassPair next = list.next();
+//                System.out.println(next.getName() + "============" + next.getClassName());
+//            }
+//        } catch (NamingException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Test
