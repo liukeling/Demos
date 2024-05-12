@@ -36,21 +36,5 @@ public class TestDeadThread extends Thread{
         System.out.println(Thread.currentThread().getName()+"=============released 1  end");
 
 
-        //synchronized是BLOCKED  我没做blocked的检测，
-//                    System.out.println(Thread.currentThread().getName()+"=============begin");
-//                    synchronized (fl1){
-//                        System.out.println(Thread.currentThread().getName()+"=============locked1");
-//                        try {
-//                            Thread.sleep(10000);
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-//                        System.out.println(Thread.currentThread().getName()+"=============sleep end");
-//                        synchronized (fl2){
-//                            System.out.println(Thread.currentThread().getName()+"=============locked2");
-//                        }
-//                        System.out.println(Thread.currentThread().getName()+"================================end lock2");
-//                    }
-//                    System.out.println(Thread.currentThread().getName()+"================================end lock1");
     }
 }

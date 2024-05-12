@@ -111,17 +111,28 @@ public class Application {
             lock1 = lock2;
         }
         //状态检测
-//        while(true) {
-//            for (Thread t : ts) {
-//                System.out.println(t.getName() + "=========" + t.getState());
-//            }
-//            try {
-//                Thread.sleep(3000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
+        while(true) {
+            boolean allTerminated = true;
+            for (Thread t : ts) {
+                System.out.println(t.getName() + "=========" + t.getState());
+                if(t.getState() != Thread.State.TERMINATED){
+                    allTerminated = false;
+                }
+            }
+            if(allTerminated){
+                System.out.println("====== all terminated....");
+                break;
+            }
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
+
+
 
     @Test
     public void testPool() {
