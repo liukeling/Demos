@@ -11,8 +11,9 @@ import cn.lkl.util.CheckDeadLockThread;
 import org.junit.Test;
 
 import javax.naming.*;
-import java.util.Hashtable;
+import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -93,7 +94,7 @@ public class Application {
      * 测试单链死锁
      */
     public void testDeadLock() throws Exception {
-        Thread checkDead = new CheckDeadLockThread();
+        Thread checkDead = new CheckDeadLockThread(Thread.currentThread().getThreadGroup(), "my check");
         checkDead.start();
         BaseLockActionProxy proxyLockAction = new BaseLockActionProxy();
         int count = 7;
@@ -103,7 +104,7 @@ public class Application {
         for (int i = 0; i < count; i++) {
 
             ReentrantLock lock2 = (i == (count - 1)) ? tmp : new ReentrantLock();
-            ts[i] = new TestDeadThread(lock1, lock2,"my thread---"+i);
+            ts[i] = new TestDeadThread(lock1, lock2, "my thread---" + i);
             ts[i].start();
 //            System.out.println(i+"====lock "+lock1);
 //            System.out.println(i+"====need "+lock2);
@@ -120,5 +121,30 @@ public class Application {
 //                e.printStackTrace();
 //            }
 //        }
+    }
+
+    @Test
+    public void testPool() {
+        BlockingQueue queue = new ArrayBlockingQueue(10);
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(1, 10, 4, TimeUnit.SECONDS, queue);
+        for (int i = 0; i < 10; i++) {
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("===============do....");
+                }
+            });
+        }
+        executor.shutdown();
+        while(!executor.isShutdown()){
+
+        }
+        System.out.println("queue size:"+queue.size());
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("===========test....");
+            }
+        });
     }
 }

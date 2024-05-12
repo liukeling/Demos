@@ -13,7 +13,8 @@ public class CheckDeadLockThread extends Thread {
 
     private DeadLockManager manager;
 
-    public CheckDeadLockThread() {
+    public CheckDeadLockThread(ThreadGroup joinGroup,String name) {
+        super(joinGroup,name);
         setDaemon(true);
         manager = DeadLockManager.getInstance();
     }
@@ -73,9 +74,9 @@ public class CheckDeadLockThread extends Thread {
             }
             System.out.println("=========end check");
             try {
-                TimeUnit.SECONDS.sleep(1);
+                TimeUnit.SECONDS.sleep(2);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                break;
             }
         }
         System.out.println("===========退出了");
@@ -96,12 +97,13 @@ public class CheckDeadLockThread extends Thread {
     private void setLevel(Node check,Node next, int level,int deep){
         if(deep < 20){
             Node nextTmp = next;
+            //同一层循环设置level
             while(nextTmp != null) {
                 if (nextTmp.level == 0) {
                     nextTmp.level = level;
                     setLevel(nextTmp, nextTmp.nexts, level+1,deep+1);
                 } else {
-                    System.out.println(level+"===============回路了：cur level:" + check.level + "     bak level:" + nextTmp.level + "  死锁:");
+                    System.out.println(level+"===============回路了：cur level:" + check.level + "     pre level:" + nextTmp.level + "  死锁:");
                     Node tmp = check.pre;
                     System.out.println(level+"===============begin:" + check.curThread.getName());
                     //等级最高的那个节点释放

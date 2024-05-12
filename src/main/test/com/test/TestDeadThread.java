@@ -7,7 +7,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class TestDeadThread extends Thread{
     private BaseLockActionProxy proxy = new BaseLockActionProxy();
     private ReentrantLock lock1,lock2;
-    TestDeadThread(ReentrantLock lock1,ReentrantLock lock2,String name){
+    public TestDeadThread(ReentrantLock lock1, ReentrantLock lock2, String name){
         super(name);
         this.lock1 = lock1;
         this.lock2 = lock2;
