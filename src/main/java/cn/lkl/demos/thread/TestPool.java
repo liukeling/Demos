@@ -28,15 +28,18 @@ public class TestPool implements ThreadFactory {
     }
 
     private TestPool(int corePoolSize,int maxPoolSize,int keepAlive, TimeUnit timeUnit) {
+        System.out.println("===========pool init.....");
         this.corePoolSize = corePoolSize;
         this.maxPoolSize = maxPoolSize;
         this.keepAlive = keepAlive;
         this.timeUnit = timeUnit;
+        System.out.println("===========pool init end");
     }
     public boolean start() {
         rwLock.writeLock().lock();
         try {
             if (!isRun) {
+                System.out.println("==========pool start begin");
                 arrayQueue = new ArrayBlockingQueue(10);
                 mainT = new CheckDeadLockThread(envG, "check main");
                 mainT.setPriority(4);
@@ -46,6 +49,7 @@ public class TestPool implements ThreadFactory {
                 executor = new ThreadPoolExecutor(1, 10, 20, TimeUnit.SECONDS, arrayQueue, this, new ThreadPoolExecutor.AbortPolicy());
                 //开启一个死锁监测
                 mainT.start();
+                System.out.println("==========pool start ok");
             }
             return true;
         }catch (Exception e){
@@ -58,6 +62,7 @@ public class TestPool implements ThreadFactory {
     public void destroy() {
         if (isRunWithLock(rwLock.writeLock())) {
             try {
+                System.out.println("==========pool destroy begin");
                 isRun = false;
                 if (executor != null) {
                     executor.shutdown();
@@ -65,6 +70,7 @@ public class TestPool implements ThreadFactory {
                 if (mainT != null && mainT.isAlive()) {
                     mainT.interrupt();
                 }
+                System.out.println("==========pool destroy end");
             } finally {
                 rwLock.writeLock().unlock();
             }
