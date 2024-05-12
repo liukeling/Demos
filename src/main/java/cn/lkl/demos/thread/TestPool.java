@@ -8,7 +8,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class TestPool implements ThreadFactory {
-    private static TestPool POOL = new TestPool();
+    private static TestPool POOL;
     private ThreadPoolExecutor executor;
     private ThreadGroup envG;
     private CheckDeadLockThread mainT;
@@ -17,24 +17,42 @@ public class TestPool implements ThreadFactory {
     private ArrayBlockingQueue arrayQueue;
     private ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
 
-    public static TestPool getPOOL() {
+    private int corePoolSize,maxPoolSize,keepAlive;
+    private TimeUnit timeUnit;
+
+    public static synchronized TestPool getPOOL(int corePoolSize,int maxPoolSize,int keepAlive, TimeUnit timeUnit) {
+        if(POOL == null) {
+            POOL = new TestPool(corePoolSize, maxPoolSize, keepAlive, timeUnit);
+        }
         return POOL;
     }
 
-    private TestPool() {
-        init();
+    private TestPool(int corePoolSize,int maxPoolSize,int keepAlive, TimeUnit timeUnit) {
+        this.corePoolSize = corePoolSize;
+        this.maxPoolSize = maxPoolSize;
+        this.keepAlive = keepAlive;
+        this.timeUnit = timeUnit;
     }
-
-    private void init() {
-        arrayQueue = new ArrayBlockingQueue(10);
-        mainT = new CheckDeadLockThread(envG, "check main");
-        mainT.setPriority(4);
-        envG = mainT.getThreadGroup();
-        System.out.println("===================init pool ok,ready to start...");
-        isRun = true;
-        executor = new ThreadPoolExecutor(1, 10, 20, TimeUnit.SECONDS, arrayQueue, this, new ThreadPoolExecutor.AbortPolicy());
-        //开启一个死锁监测
-        mainT.start();
+    public boolean start() {
+        rwLock.writeLock().lock();
+        try {
+            if (!isRun) {
+                arrayQueue = new ArrayBlockingQueue(10);
+                mainT = new CheckDeadLockThread(envG, "check main");
+                mainT.setPriority(4);
+                envG = mainT.getThreadGroup();
+                System.out.println("===================init pool ok,ready to start...");
+                isRun = true;
+                executor = new ThreadPoolExecutor(1, 10, 20, TimeUnit.SECONDS, arrayQueue, this, new ThreadPoolExecutor.AbortPolicy());
+                //开启一个死锁监测
+                mainT.start();
+            }
+            return true;
+        }catch (Exception e){
+            return false;
+        }finally {
+            rwLock.writeLock().unlock();
+        }
     }
 
     public void destroy() {
